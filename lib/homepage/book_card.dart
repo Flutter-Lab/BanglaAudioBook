@@ -1,8 +1,6 @@
 import 'package:bangla_audio_book/audio_paly_screen/player_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/widgets.dart';
 
 class BookCard extends StatelessWidget {
   const BookCard({

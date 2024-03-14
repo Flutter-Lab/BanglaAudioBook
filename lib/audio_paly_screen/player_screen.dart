@@ -160,10 +160,10 @@ class PlayerScreenState extends State<PlayerScreen>
                     )),
               ],
             ),
-            ElevatedButton(
-              onPressed: _audioSource!.clearCache,
-              child: const Text('Clear cache'),
-            ),
+            // ElevatedButton(
+            //   onPressed: _audioSource!.clearCache,
+            //   child: const Text('Clear cache'),
+            // ),
 
             ChapterList(bookMap: widget.bookMap, player: _player),
           ],
