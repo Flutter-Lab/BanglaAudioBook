@@ -23,7 +23,7 @@ class PlayerScreenState extends State<PlayerScreen>
     with WidgetsBindingObserver {
   final _player = AudioPlayer();
   // String get audioSrc => widget.bookMap['audio_src'];
-  var _audioSource;
+  late LockCachingAudioSource _audioSource;
 
   @override
   void initState() {
@@ -41,27 +41,27 @@ class PlayerScreenState extends State<PlayerScreen>
           // Supports range requests:
           widget.bookMap['audio_src'],
         ),
-        tag: const MediaItem(
+        tag: MediaItem(
           // Specify a unique ID for each media item:
           id: '1',
           // Metadata to display in the notification:
-          album: "Album name",
-          title: "Song name",
+          album: "Bangla Audio Book",
+          title: widget.bookMap['title'],
           artUri: null,
         ));
     final session = await AudioSession.instance;
     await session.configure(const AudioSessionConfiguration.speech());
     _player.playbackEventStream.listen((event) {},
         onError: (Object e, StackTrace stackTrace) {
-      print('A stream error occurred: $e');
+      debugPrint('A stream error occurred: $e');
     });
     try {
       // Use resolve() if you want to obtain a UriAudioSource pointing directly
       // to the cache file.
       // await _player.setAudioSource(await _audioSource.resolve());
-      await _player.setAudioSource(_audioSource!);
+      await _player.setAudioSource(_audioSource);
     } catch (e) {
-      print("Error loading audio source: $e");
+      debugPrint("Error loading audio source: $e");
     }
   }
 
@@ -89,7 +89,7 @@ class PlayerScreenState extends State<PlayerScreen>
   Stream<PositionData> get _positionDataStream =>
       Rx.combineLatest3<Duration, double, Duration?, PositionData>(
           _player.positionStream,
-          _audioSource!.downloadProgressStream,
+          _audioSource.downloadProgressStream,
           _player.durationStream,
           (position, downloadProgress, reportedDuration) {
         final duration = reportedDuration ?? Duration.zero;

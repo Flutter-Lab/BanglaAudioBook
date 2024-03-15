@@ -55,6 +55,12 @@ const bookList = [
         'https://fs.pbs.com.bd/DIR/Com/PBS/Product/ImageDetails/2201446.jpg',
     'audio_src':
         'https://drive.usercontent.google.com/uc?id=1uB98fwaTweZyzsxJTUKnuC8A-TX7757l&export=download&authuser=2',
-    'chapter_list': []
+    'total_length': 4894,
+    'chapter_list': [
+      {
+        'title': 'সম্পূর্ন অংশ',
+        'start_time': 1,
+      },
+    ]
   },
 ];

@@ -24,7 +24,7 @@ class ChapterList extends StatelessWidget {
             var chapter = bookMap['chapter_list'][index];
             var chapterStartTime = chapter['start_time'];
             var nextChapterStartTime =
-                index + 1 < bookMap['chapter_list'].length
+                index < bookMap['chapter_list'].length - 1
                     ? (bookMap['chapter_list'][index + 1]['start_time'])
                     : bookMap['total_length'];
 
