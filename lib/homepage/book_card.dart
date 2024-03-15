@@ -12,6 +12,9 @@ class BookCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    var image = book['image'];
+    var title = book['title'];
+    // var image = book['image'];
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -36,7 +39,7 @@ class BookCard extends StatelessWidget {
                     Expanded(
                       flex: 4,
                       child: CachedNetworkImage(
-                        imageUrl: book['image'],
+                        imageUrl: image,
                         fit: BoxFit.fitWidth,
                       ),
                     ),
@@ -44,7 +47,7 @@ class BookCard extends StatelessWidget {
                       flex: 1,
                       child: Center(
                         child: Text(
-                          book['title'],
+                          title,
                           style: Theme.of(context).textTheme.titleSmall,
                           textAlign: TextAlign.center,
                         ),

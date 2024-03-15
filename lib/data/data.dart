@@ -5,6 +5,7 @@ const bookList = [
         'https://drive.usercontent.google.com/download?id=1k_zviPl3pKEsWttmOLuy20du0E-Hstyj&export=download',
     'audio_src':
         'https://drive.usercontent.google.com/download?id=1RmgVBm4aQPkuxN1_mEmI47gg7xQvOLOQ&export=download&authuser=2',
+    'total_length': 5395,
     'chapter_list': [
       {
         'title': 'লেখক/পাঠক পরিচয়',

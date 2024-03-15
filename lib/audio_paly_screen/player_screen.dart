@@ -1,20 +1,13 @@
-// This example demonstrates simultaneous playback and caching of downloaded
-// audio.
-//
-// To run:
-//
-// flutter run -t lib/example_caching.dart
-
 import 'package:audio_session/audio_session.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter/widgets.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:rxdart/rxdart.dart';
-
 import 'common.dart';
 import 'components/chapter_list.dart';
+import 'components/forword_rewind.dart';
 
 class PlayerScreen extends StatefulWidget {
   final Map bookMap;
@@ -29,7 +22,7 @@ class PlayerScreenState extends State<PlayerScreen>
     with WidgetsBindingObserver {
   final _player = AudioPlayer();
   // String get audioSrc => widget.bookMap['audio_src'];
-  LockCachingAudioSource? _audioSource;
+  var _audioSource;
 
   @override
   void initState() {
@@ -42,10 +35,19 @@ class PlayerScreenState extends State<PlayerScreen>
   }
 
   Future<void> _init() async {
-    _audioSource = LockCachingAudioSource(Uri.parse(
-      // Supports range requests:
-      widget.bookMap['audio_src'],
-    ));
+    _audioSource = LockCachingAudioSource(
+        Uri.parse(
+          // Supports range requests:
+          widget.bookMap['audio_src'],
+        ),
+        tag: const MediaItem(
+          // Specify a unique ID for each media item:
+          id: '1',
+          // Metadata to display in the notification:
+          album: "Album name",
+          title: "Song name",
+          artUri: null,
+        ));
     final session = await AudioSession.instance;
     await session.configure(const AudioSessionConfiguration.speech());
     _player.playbackEventStream.listen((event) {},
@@ -120,52 +122,41 @@ class PlayerScreenState extends State<PlayerScreen>
             ControlButtons(_player),
             // Display seek bar. Using StreamBuilder, this widget rebuilds
             // each time the position, buffered position or duration changes.
-            StreamBuilder<PositionData>(
-              stream: _positionDataStream,
-              builder: (context, snapshot) {
-                final positionData = snapshot.data;
-                // print(
-                //   positionData?.duration ?? Duration.zero,
-                // );
-                return SeekBar(
-                  duration: positionData?.duration ?? Duration.zero,
-                  position: positionData?.position ?? Duration.zero,
-                  bufferedPosition:
-                      positionData?.bufferedPosition ?? Duration.zero,
-                  onChangeEnd: _player.seek,
-                );
-              },
+            Expanded(
+              flex: 3,
+              child: StreamBuilder<PositionData>(
+                stream: _positionDataStream,
+                builder: (context, snapshot) {
+                  final positionData = snapshot.data;
+
+                  // print(
+                  //   positionData?.duration ?? Duration.zero,
+                  // );
+                  return Column(
+                    children: [
+                      SeekBar(
+                        duration: positionData?.duration ?? Duration.zero,
+                        position: positionData?.position ?? Duration.zero,
+                        bufferedPosition:
+                            positionData?.bufferedPosition ?? Duration.zero,
+                        onChangeEnd: _player.seek,
+                      ),
+                      ForWordAndRewind(player: _player),
+                      ChapterList(
+                        bookMap: widget.bookMap,
+                        player: _player,
+                        positionData: positionData?.position ?? Duration.zero,
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                IconButton(
-                    onPressed: () {
-                      _player
-                          .seek(_player.position - const Duration(seconds: 30));
-                    },
-                    icon: const Icon(
-                      Icons.replay_30_outlined,
-                      size: 32,
-                    )),
-                const SizedBox(width: 32),
-                IconButton(
-                    onPressed: () {
-                      _player
-                          .seek(_player.position + const Duration(seconds: 30));
-                    },
-                    icon: const Icon(
-                      Icons.forward_30_outlined,
-                      size: 32,
-                    )),
-              ],
-            ),
+
             // ElevatedButton(
             //   onPressed: _audioSource!.clearCache,
             //   child: const Text('Clear cache'),
             // ),
-
-            ChapterList(bookMap: widget.bookMap, player: _player),
           ],
         ),
       ),
