@@ -1,5 +1,6 @@
 const bookList = [
   {
+    'id': 'book1',
     'title': 'ডোপামিন ডিটক্স',
     'image':
         'https://drive.usercontent.google.com/download?id=1k_zviPl3pKEsWttmOLuy20du0E-Hstyj&export=download',
@@ -50,7 +51,23 @@ const bookList = [
     ]
   },
   {
-    'title': 'দ্যা পাওয়ার অব পজিটিভ থিংকিং',
+    'id': 'book2',
+    'title': 'দ্য অ্যালকেমিস্ট',
+    'image':
+        'https://ds.rokomari.store/rokomari110/ProductNew20190903/260X372/The_Alchemist-Paulo_Coelho-51062-220385.jpg',
+    'audio_src':
+        'https://drive.usercontent.google.com/download?id=130-P1k4YiWMiAykjazKC3SZhvCcZC_l8&export=download&confirm=t&uuid=f3d184ae-cc1a-4835-a970-0cefd6e06b6b',
+    'total_length': 17564,
+    'chapter_list': [
+      {
+        'title': 'সম্পূর্ন অংশ',
+        'start_time': 1,
+      },
+    ]
+  },
+  {
+    'id': 'book3',
+    'title': 'দ্য পাওয়ার অব পজিটিভ থিংকিং',
     'image':
         'https://fs.pbs.com.bd/DIR/Com/PBS/Product/ImageDetails/2201446.jpg',
     'audio_src':

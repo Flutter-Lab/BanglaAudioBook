@@ -2,6 +2,7 @@ import 'package:audio_session/audio_session.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:hive_flutter/adapters.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:rxdart/rxdart.dart';
@@ -60,32 +61,57 @@ class PlayerScreenState extends State<PlayerScreen>
       // to the cache file.
       // await _player.setAudioSource(await _audioSource.resolve());
       await _player.setAudioSource(_audioSource);
+
+      await goToPreviousListionPosition();
+      _player.play();
+
+      //Go to Previous Listen Time if has any
     } catch (e) {
       debugPrint("Error loading audio source: $e");
     }
   }
 
-  @override
-  void dispose() {
-    // ambiguate(WidgetsBinding.instance)!.removeObserver(this);
-    // Release decoders and buffers back to the operating system making them
-    // available for other apps to use.
-    _player.dispose();
-    super.dispose();
+  Future<void> goToPreviousListionPosition() async {
+    var box = Hive.box('user_data');
+    var bookID = widget.bookMap['id'];
+    if (box.containsKey(bookID)) {
+      print('Found Previous Position');
+      int previousPosition = box.get(bookID);
+      int newPosition = previousPosition - 10;
+
+      await _player.seek(Duration(seconds: newPosition));
+    } else {
+      print('Not Found Previous Position');
+    }
   }
 
-  // @override
-  // void didChangeAppLifecycleState(AppLifecycleState state) {
-  //   if (state == AppLifecycleState.paused) {
-  //     // Release the player's resources when not in use. We use "stop" so that
-  //     // if the app resumes later, it will still remember what position to
-  //     // resume from.
-  //     _player.stop();
-  //   }
-  // }
+  @override
+  void dispose() async {
+    // ambiguate(WidgetsBinding.instance)!.removeObserver(this);
+    // Release decoders and buffers back to the operating system making them
 
-  /// Collects the data useful for displaying in a seek bar, using a handy
-  /// feature of rx_dart to combine the 3 streams of interest into one.
+    print('Dispose is called');
+
+    //Save Current user listen time with book_id
+
+    _player.dispose();
+    super.dispose();
+    saveUserCurrentListenTime();
+  }
+
+  void saveUserCurrentListenTime() {
+    var box = Hive.box('user_data');
+    var currentPostion = _player.position.inSeconds;
+    if (currentPostion > 10) {
+      var bookID = widget.bookMap['id'];
+
+      box.put(bookID, currentPostion);
+
+      print(
+          'New Listen Position Saved. ID: $bookID , Position: $currentPostion ');
+    }
+  }
+
   Stream<PositionData> get _positionDataStream =>
       Rx.combineLatest3<Duration, double, Duration?, PositionData>(
           _player.positionStream,
