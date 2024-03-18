@@ -36,11 +36,38 @@ class PlayerScreenState extends State<PlayerScreen>
     _init();
   }
 
+  String getChapterURL(Map bookMap) {
+    var box = Hive.box('user_data');
+    var bookID = widget.bookMap['id'];
+
+    var bookInfo = box.get(bookID);
+
+    print('Book Info :: $bookInfo');
+
+    var index = bookInfo?['index'] ?? 0;
+
+    print('Index is:: $index');
+
+    String source = bookMap['chapter_list'][index]['audio_source'];
+
+    print('Got Source for Multi Audio');
+
+    return source;
+  }
+
   Future<void> _init() async {
+    bool? isMultiSource = widget.bookMap['multi_source'];
+
+    String srcUrl = isMultiSource == true
+        ? getChapterURL(widget.bookMap)
+        : widget.bookMap['audio_src'];
+
+    print('Source is: $srcUrl');
+
     _audioSource = LockCachingAudioSource(
         Uri.parse(
           // Supports range requests:
-          widget.bookMap['audio_src'],
+          srcUrl,
         ),
         tag: MediaItem(
           // Specify a unique ID for each media item:
@@ -76,10 +103,23 @@ class PlayerScreenState extends State<PlayerScreen>
     var bookID = widget.bookMap['id'];
     if (box.containsKey(bookID)) {
       print('Found Previous Position');
-      int previousPosition = box.get(bookID);
-      int newPosition = previousPosition - 10;
+      late int previousPosition;
 
-      await _player.seek(Duration(seconds: newPosition));
+      if (widget.bookMap['multi_source'] == true) {
+        var bookInfo = box.get(bookID);
+        previousPosition = bookInfo['position'] ?? 0;
+
+        print('Book in map: ${box.get(bookID)}');
+
+        print('Previous Position in Multi : $previousPosition');
+      } else {
+        previousPosition = box.get(bookID);
+      }
+
+      if (previousPosition > 15) {
+        int newPosition = previousPosition - 10;
+        await _player.seek(Duration(seconds: newPosition));
+      }
     } else {
       print('Not Found Previous Position');
     }
@@ -94,18 +134,27 @@ class PlayerScreenState extends State<PlayerScreen>
 
     //Save Current user listen time with book_id
 
+    saveCurrentAudioPostion();
     _player.dispose();
     super.dispose();
-    saveUserCurrentListenTime();
   }
 
-  void saveUserCurrentListenTime() {
+  void saveCurrentAudioPostion() {
+    print('TTTT');
     var box = Hive.box('user_data');
     var currentPostion = _player.position.inSeconds;
     if (currentPostion > 10) {
       var bookID = widget.bookMap['id'];
 
-      box.put(bookID, currentPostion);
+      if (widget.bookMap['multi_source'] == true) {
+        int index = box.get(bookID)?['index'] ?? 0;
+        box.put(bookID, {
+          'index': index,
+          'position': currentPostion,
+        });
+      } else {
+        box.put(bookID, currentPostion);
+      }
 
       print(
           'New Listen Position Saved. ID: $bookID , Position: $currentPostion ');

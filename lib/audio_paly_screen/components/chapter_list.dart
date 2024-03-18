@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:just_audio_background/just_audio_background.dart';
 import 'package:lottie/lottie.dart';
 
-class ChapterList extends StatelessWidget {
+class ChapterList extends StatefulWidget {
   const ChapterList({
     super.key,
     required this.bookMap,
@@ -15,29 +17,52 @@ class ChapterList extends StatelessWidget {
   final Duration positionData;
 
   @override
+  State<ChapterList> createState() => _ChapterListState();
+}
+
+class _ChapterListState extends State<ChapterList> {
+  int? chapterIndex;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    if (widget.bookMap['multi_source'] == true) {
+      chapterIndex = getChapterIndex();
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Expanded(
       child: ListView.builder(
           shrinkWrap: true,
-          itemCount: bookMap['chapter_list'].length,
+          itemCount: widget.bookMap['chapter_list'].length,
           itemBuilder: (context, index) {
-            var chapter = bookMap['chapter_list'][index];
+            var chapter = widget.bookMap['chapter_list'][index];
             var chapterStartTime = chapter['start_time'];
             var nextChapterStartTime =
-                index < bookMap['chapter_list'].length - 1
-                    ? (bookMap['chapter_list'][index + 1]['start_time'])
-                    : bookMap['total_length'];
+                index < widget.bookMap['chapter_list'].length - 1
+                    ? (widget.bookMap['chapter_list'][index + 1]['start_time'])
+                    : widget.bookMap['total_length'];
 
-            int chapterLengthInSec = nextChapterStartTime - chapterStartTime;
+            int chapterLengthInSec = widget.bookMap['multi_source'] == true
+                ? chapter['length']
+                : (nextChapterStartTime - chapterStartTime);
 
             String chapterLength = getTimeFromSeconds(chapterLengthInSec);
             // var chapterLength = chapterLengthInSec;
 
-            int position = positionData.inSeconds;
-            int? chapterProgressInSec =
-                (position >= chapterStartTime && position < nextChapterStartTime
-                    ? (position - chapterStartTime)
-                    : null) as int?;
+            int position = widget.positionData.inSeconds;
+            //  chapterIndex = getChapterIndex();
+
+            int? chapterProgressInSec;
+            chapterProgressInSec = getChapterProgessInSec(
+                position: position,
+                chapterStartTime: chapterStartTime,
+                nextChapterStartTime: nextChapterStartTime,
+                chapterIndex: chapterIndex,
+                listIndex: index);
 
             String? chapterProgressTime = chapterProgressInSec != null
                 ? getTimeFromSeconds(chapterProgressInSec)
@@ -52,7 +77,21 @@ class ChapterList extends StatelessWidget {
                 children: [
                   ListTile(
                     onTap: () {
-                      _player.seek(Duration(seconds: chapter['start_time']));
+                      if (widget.bookMap['multi_source'] == true) {
+                        //Change chapter index
+                        setState(() {
+                          chapterIndex = index;
+                        });
+
+                        //Change Player Audio Source
+                        changePlayerAudioSource(chapter: chapter);
+
+                        //Change audio index in Hive
+                        saveAudioIndexInHive(index);
+                      } else {
+                        widget._player
+                            .seek(Duration(seconds: chapter['start_time']));
+                      }
                     },
                     title: Text('${chapter['title']}'),
                     subtitle: Row(
@@ -64,20 +103,29 @@ class ChapterList extends StatelessWidget {
                     ),
                     trailing: Column(
                       children: [
-                        if (progressPercent != null && _player.playing)
+                        if (progressPercent != null && widget._player.playing)
                           Expanded(
                               child: Column(
-                            mainAxisSize: MainAxisSize.min,
+                            // mainAxisSize: MainAxisSize.min,
                             children: [
                               Expanded(
-                                flex: 3,
+                                flex: 2,
                                 child: Lottie.asset(
                                     'assets/book_read_animation.json'),
                               ),
                               Expanded(
-                                flex: 2,
-                                child: Lottie.asset(
-                                    'assets/music_animation_1.json'),
+                                flex: 1,
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Lottie.asset(
+                                        repeat: true,
+                                        'assets/music_animation_1.json'),
+                                    Lottie.asset(
+                                        repeat: true,
+                                        'assets/music_animation_1.json'),
+                                  ],
+                                ),
                               ),
                             ],
                           )),
@@ -100,6 +148,35 @@ class ChapterList extends StatelessWidget {
     );
   }
 
+  int? getChapterProgessInSec(
+      {required int position,
+      required chapterStartTime,
+      required nextChapterStartTime,
+      required chapterIndex,
+      required listIndex}) {
+    int? chapterProgressInSec;
+    if (widget.bookMap['multi_source'] == true) {
+      if (chapterIndex == listIndex) {
+        chapterProgressInSec = position;
+      }
+    } else {
+      chapterProgressInSec =
+          (position >= chapterStartTime && position < nextChapterStartTime
+              ? (position - chapterStartTime)
+              : null) as int?;
+    }
+    return chapterProgressInSec;
+  }
+
+  int getChapterIndex() {
+    var box = Hive.box('user_data');
+    var bookID = widget.bookMap['id'];
+
+    var chapterIndex = box.get(bookID)?['index'] ?? 0;
+
+    return chapterIndex;
+  }
+
   String getTimeFromSeconds(int seconds) {
     int minutes = seconds ~/ 60; // Get the whole number of minutes
     int remainingSeconds = seconds % 60; // Get the remaining seconds
@@ -109,5 +186,28 @@ class ChapterList extends StatelessWidget {
     String formattedSeconds = remainingSeconds.toString().padLeft(2, '0');
 
     return '$formattedMinutes:$formattedSeconds';
+  }
+
+  void changePlayerAudioSource({required Map chapter}) {
+    widget._player.setAudioSource(LockCachingAudioSource(
+        Uri.parse(
+          // Supports range requests:
+          chapter['audio_source'],
+        ),
+        tag: MediaItem(
+          // Specify a unique ID for each media item:
+          id: '1',
+          // Metadata to display in the notification:
+          album: "Bangla Audio Book",
+          title: chapter['title'],
+          artUri: null,
+        )));
+  }
+
+  void saveAudioIndexInHive(int index) {
+    var box = Hive.box('user_data');
+    var bookID = widget.bookMap['id'];
+
+    box.put(bookID, {'index': index});
   }
 }

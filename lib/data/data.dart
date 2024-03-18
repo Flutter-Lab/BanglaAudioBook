@@ -75,8 +75,86 @@ const bookList = [
     'total_length': 4894,
     'chapter_list': [
       {
-        'title': 'সম্পূর্ন অংশ',
+        'title': 'ভূমিকা',
         'start_time': 1,
+      },
+      {
+        'title': 'নিজের উপর আস্থা রাখুন',
+        'start_time': 164,
+      },
+      {
+        'title': 'প্রার্থনার শক্তি',
+        'start_time': 627,
+      },
+    ]
+  },
+  {
+    'id': 'book4',
+    'title': 'আমি পদ্মজা',
+    'image':
+        'https://golpershohor.com/wp-content/uploads/2022/04/FB_IMG_1651316435000.jpg',
+    'multi_source': true,
+    'total_length': 4894,
+    'chapter_list': [
+      {
+        'audio_source':
+            'https://drive.usercontent.google.com/download?id=1FADqniX4nFYhAjktU0D-wKnMU-_5mNxi&export=download&authuser=2',
+        'title': 'আমি পদ্মজা - পর্ব ১',
+        'length': 810,
+      },
+      {
+        'title': 'আমি পদ্মজা - পর্ব ২',
+        'audio_source':
+            'https://drive.usercontent.google.com/download?id=1YGTApZBwm_vhkV8N9c7YPpbI4J6GFdKM&export=download&authuser=2',
+        'length': 736,
+      },
+      {
+        'title': 'আমি পদ্মজা - পর্ব ৩',
+        'audio_source':
+            'https://drive.google.com/uc?export=download&id=1HwqL_C_SOFl1h_FqZeaCj74lzlk9tXlX',
+        'length': 645,
+      },
+      {
+        'title': 'আমি পদ্মজা - পর্ব ৪',
+        'audio_source':
+            'https://drive.google.com/uc?export=download&id=1qMp4fkmsLh2XUr5eZnQhWbvBiVMbqWlO',
+        'length': 100,
+      },
+      {
+        'title': 'আমি পদ্মজা - পর্ব ৫',
+        'audio_source':
+            'https://drive.google.com/uc?export=download&id=1mBAGJ5QXULGaDP0Bkh16Zmw17_ZJAZyu',
+        'length': 100,
+      },
+      {
+        'title': 'আমি পদ্মজা - পর্ব ৬',
+        'audio_source':
+            'https://drive.google.com/uc?export=download&id=16YCqDx7UYkZDh35yBnAys3cGn6IUfuxM',
+        'length': 100,
+      },
+      {
+        'title': 'আমি পদ্মজা - পর্ব ৭',
+        'audio_source':
+            'https://drive.google.com/uc?export=download&id=1TlAljOctYSdeGAYAa3XuOS2FoyyFrm0_',
+        'length': 100,
+      },
+      {
+        'title': 'আমি পদ্মজা - পর্ব ৮',
+        'audio_source':
+            'https://drive.google.com/uc?export=download&id=1SgAVYncwtlzD59LWOIEWmT4_5y-UaO9q',
+        'length': 100,
+      },
+      {
+        'title': 'আমি পদ্মজা - পর্ব ৯',
+        'audio_source':
+            'https://drive.google.com/uc?export=download&id=1mvmojIP7uiWV1S_ojk2tlu7qITpR3TF-',
+        'length': 100,
+      },
+      {
+        'title': 'আমি পদ্মজা - পর্ব ১০',
+        'audio_source':
+            'https://drive.google.com/uc?export=download&id=1ulOib_dGRLgzdHFBrBxUiVeId-DjRpQB',
+        'length': 100,
       },
     ]
   },
