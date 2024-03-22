@@ -1,8 +1,8 @@
 import 'package:bangla_audio_book/data/data.dart';
 import 'package:flutter/material.dart';
 
-import 'homepage/book_card.dart';
-import 'homepage/components/books_listview.dart';
+import 'components/book_card.dart';
+import 'components/setting_button.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -16,6 +16,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        actions: const [SettingButton()],
         centerTitle: true,
         title: const Text('Bangla Audio Book'),
       ),

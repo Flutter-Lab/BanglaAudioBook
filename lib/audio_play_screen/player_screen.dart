@@ -1,4 +1,5 @@
 import 'package:audio_session/audio_session.dart';
+import 'package:bangla_audio_book/audio_play_screen/components/timer_text.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -7,9 +8,9 @@ import 'package:just_audio/just_audio.dart';
 import 'package:just_audio_background/just_audio_background.dart';
 import 'package:rxdart/rxdart.dart';
 import 'common.dart';
-import 'components/chapter_list.dart';
-import 'components/control_buttons.dart';
-import 'components/forword_rewind.dart';
+import 'components/chapter_list/chapter_list.dart';
+import 'components/control_buttons/control_buttons.dart';
+import 'components/control_buttons/forword_rewind.dart';
 
 class PlayerScreen extends StatefulWidget {
   final Map bookMap;
@@ -20,9 +21,11 @@ class PlayerScreen extends StatefulWidget {
   PlayerScreenState createState() => PlayerScreenState();
 }
 
+final player = AudioPlayer();
+
 class PlayerScreenState extends State<PlayerScreen>
     with WidgetsBindingObserver {
-  final _player = AudioPlayer();
+  // final _player = AudioPlayer();
   // String get audioSrc => widget.bookMap['audio_src'];
   late LockCachingAudioSource _audioSource;
 
@@ -41,17 +44,11 @@ class PlayerScreenState extends State<PlayerScreen>
     var bookID = widget.bookMap['id'];
 
     var bookInfo = box.get(bookID);
-
-    print('Book Info :: $bookInfo');
-
+    // print('Book Info :: $bookInfo');
     var index = bookInfo?['index'] ?? 0;
-
-    print('Index is:: $index');
-
+    // print('Index is:: $index');
     String source = bookMap['chapter_list'][index]['audio_source'];
-
-    print('Got Source for Multi Audio');
-
+    // print('Got Source for Multi Audio');
     return source;
   }
 
@@ -79,7 +76,7 @@ class PlayerScreenState extends State<PlayerScreen>
         ));
     final session = await AudioSession.instance;
     await session.configure(const AudioSessionConfiguration.speech());
-    _player.playbackEventStream.listen((event) {},
+    player.playbackEventStream.listen((event) {},
         onError: (Object e, StackTrace stackTrace) {
       debugPrint('A stream error occurred: $e');
     });
@@ -87,10 +84,12 @@ class PlayerScreenState extends State<PlayerScreen>
       // Use resolve() if you want to obtain a UriAudioSource pointing directly
       // to the cache file.
       // await _player.setAudioSource(await _audioSource.resolve());
-      await _player.setAudioSource(_audioSource);
+      await player.setAudioSource(_audioSource);
+
+      
 
       await goToPreviousListionPosition();
-      _player.play();
+      player.play();
 
       //Go to Previous Listen Time if has any
     } catch (e) {
@@ -118,7 +117,7 @@ class PlayerScreenState extends State<PlayerScreen>
 
       if (previousPosition > 15) {
         int newPosition = previousPosition - 10;
-        await _player.seek(Duration(seconds: newPosition));
+        await player.seek(Duration(seconds: newPosition));
       }
     } else {
       print('Not Found Previous Position');
@@ -135,14 +134,14 @@ class PlayerScreenState extends State<PlayerScreen>
     //Save Current user listen time with book_id
 
     saveCurrentAudioPostion();
-    _player.dispose();
+    player.dispose();
     super.dispose();
   }
 
   void saveCurrentAudioPostion() {
     print('TTTT');
     var box = Hive.box('user_data');
-    var currentPostion = _player.position.inSeconds;
+    var currentPostion = player.position.inSeconds;
     if (currentPostion > 10) {
       var bookID = widget.bookMap['id'];
 
@@ -163,9 +162,9 @@ class PlayerScreenState extends State<PlayerScreen>
 
   Stream<PositionData> get _positionDataStream =>
       Rx.combineLatest3<Duration, double, Duration?, PositionData>(
-          _player.positionStream,
+          player.positionStream,
           _audioSource.downloadProgressStream,
-          _player.durationStream,
+          player.durationStream,
           (position, downloadProgress, reportedDuration) {
         final duration = reportedDuration ?? Duration.zero;
         final bufferedPosition = duration * downloadProgress;
@@ -195,7 +194,7 @@ class PlayerScreenState extends State<PlayerScreen>
               ),
             ),
             // Display play/pause button and volume/speed sliders.
-            ControlButtons(_player),
+            ControlButtons(player),
             // Display seek bar. Using StreamBuilder, this widget rebuilds
             // each time the position, buffered position or duration changes.
             Expanded(
@@ -215,12 +214,13 @@ class PlayerScreenState extends State<PlayerScreen>
                         position: positionData?.position ?? Duration.zero,
                         bufferedPosition:
                             positionData?.bufferedPosition ?? Duration.zero,
-                        onChangeEnd: _player.seek,
+                        onChangeEnd: player.seek,
                       ),
-                      ForWordAndRewind(player: _player),
+                      ForWordAndRewind(player: player),
+                      TimerText(player: player),
                       ChapterList(
                         bookMap: widget.bookMap,
-                        player: _player,
+                        player: player,
                         positionData: positionData?.position ?? Duration.zero,
                       ),
                     ],

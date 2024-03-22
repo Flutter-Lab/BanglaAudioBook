@@ -1,8 +1,11 @@
-import 'package:bangla_audio_book/audio_paly_screen/player_screen.dart';
+import 'package:bangla_audio_book/audio_play_screen/player_screen.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class BookCard extends StatelessWidget {
+import '../../providers/timer_provider.dart';
+
+class BookCard extends ConsumerWidget {
   const BookCard({
     super.key,
     required this.book,
@@ -11,12 +14,17 @@ class BookCard extends StatelessWidget {
   final Map book;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     var image = book['image'];
     var title = book['title'];
-    // var image = book['image'];
+
+    final timerState = ref.watch(timerProvider);
+
     return GestureDetector(
       onTap: () {
+        if (timerState.isActivated == false) {
+          ref.read(timerProvider.notifier).startTimer();
+        }
         Navigator.push(
             context,
             MaterialPageRoute(

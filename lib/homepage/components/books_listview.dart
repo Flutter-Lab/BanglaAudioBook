@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../data/data.dart';
-import '../book_card.dart';
+import 'book_card.dart';
 
 class BooksListView extends StatelessWidget {
   const BooksListView({
